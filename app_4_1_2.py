@@ -293,10 +293,10 @@ if page == 'predictor':
                 'home','kids_pets','travel','misc_net'], index=0)
         with r1b:
             state = st.selectbox("Customer State", [
-                'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID',
-                'IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS',
-                'MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK',
-                'OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'], index=4)
+                'California','Missouri','Nebraska',
+                'Oregon','Washington','Wyoming',
+                'New Mexico','Colorado','Arizona',
+                'Utah','Idaho','Alaska','Hawaii'], index=4)
 
         r2a, r2b = st.columns(2)
         with r2a:
