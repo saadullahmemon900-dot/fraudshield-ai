@@ -476,4 +476,4 @@ elif "About" in page:
                 <b style="color:#94a3b8;">Pandas / NumPy</b> — Data processing<br>
                 <b style="color:#94a3b8;">Plotly</b> — Interactive charts
             </div>
-        </div>""", unsafe_allow_html=True)
+        </div>""", unsafe_allow_html=True)#end 
