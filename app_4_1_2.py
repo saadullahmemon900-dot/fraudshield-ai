@@ -28,8 +28,15 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
     .stApp { background: #080c14; font-family: 'DM Sans', sans-serif; color: #e2e8f0; }
     #MainMenu, footer, header { visibility: hidden; }
+
+    /* ── SIDEBAR ALWAYS VISIBLE — COLLAPSE BUTTON HIDDEN ── */
+    [data-testid="collapsedControl"] { display: none !important; }
+    section[data-testid="stSidebar"] { display: block !important; visibility: visible !important; }
+    section[data-testid="stSidebar"] > div { transform: none !important; }
+
     [data-testid="stSidebar"] { background: linear-gradient(180deg, #0d1117 0%, #0a0f1a 100%); border-right: 1px solid #1a2332; }
     [data-testid="stSidebar"] * { color: #94a3b8 !important; }
+
     .hero-title {
         font-family: 'Syne', sans-serif; font-size: 3.2rem; font-weight: 800;
         background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #f472b6 100%);
@@ -93,8 +100,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ─── SESSION STATE — SABSE PEHLE ─────────────────────────────────────────────
-# YE LINES SABI CHEEZ SE PEHLE HAIN — PAGE SWITCH PE KABHI RESET NAHI HONGI
+# ─── SESSION STATE ────────────────────────────────────────────────────────────
 if 'prediction_done' not in st.session_state:
     st.session_state.prediction_done = False
 if 'prediction' not in st.session_state:
@@ -113,7 +119,7 @@ def load_and_train():
     try:
         df = pd.read_parquet('credit_card_frauds.parquet')
     except FileNotFoundError:
-        st.warning("credit_card_frauds.csv not found. Using sample data.")
+        st.warning("credit_card_frauds.parquet not found. Using sample data.")
         np.random.seed(42)
         n = 5000
         df = pd.DataFrame({
@@ -261,7 +267,6 @@ if "Predictor" in page:
             prediction = pipe.predict(sample)[0]
             proba      = pipe.predict_proba(sample)[0]
 
-            # Sab kuch session_state mein save karo
             st.session_state.prediction_done = True
             st.session_state.prediction      = int(prediction)
             st.session_state.fraud_prob      = float(proba[1] * 100)
@@ -276,7 +281,6 @@ if "Predictor" in page:
                 "📅 Day":      day
             }
 
-        # Result — session_state se read hota hai, page switch ke baad bhi rahega
         if st.session_state.prediction_done:
             if st.session_state.prediction == 1:
                 st.markdown("""
