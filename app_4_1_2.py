@@ -26,26 +26,17 @@ st.set_page_config(
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
     .stApp { background: #080c14; font-family: 'DM Sans', sans-serif; color: #e2e8f0; }
     #MainMenu, footer, header { visibility: hidden; }
-
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1117 0%, #0a0f1a 100%);
-        border-right: 1px solid #1a2332;
-    }
+    [data-testid="stSidebar"] { background: linear-gradient(180deg, #0d1117 0%, #0a0f1a 100%); border-right: 1px solid #1a2332; }
     [data-testid="stSidebar"] * { color: #94a3b8 !important; }
-
     .hero-title {
         font-family: 'Syne', sans-serif; font-size: 3.2rem; font-weight: 800;
         background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #f472b6 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         background-clip: text; line-height: 1.1; margin-bottom: 0.2rem;
     }
-    .hero-sub {
-        font-size: 1.05rem; color: #64748b; font-weight: 300;
-        margin-bottom: 2rem; letter-spacing: 0.02em;
-    }
+    .hero-sub { font-size: 1.05rem; color: #64748b; font-weight: 300; margin-bottom: 2rem; letter-spacing: 0.02em; }
     .metric-card {
         background: linear-gradient(135deg, #0d1f35 0%, #111827 100%);
         border: 1px solid #1e3a5f; border-radius: 16px; padding: 24px 28px;
@@ -58,7 +49,6 @@ st.markdown("""
     .metric-label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #475569; margin-bottom: 8px; }
     .metric-value { font-family: 'Syne', sans-serif; font-size: 2.1rem; font-weight: 700; color: #f1f5f9; line-height: 1; }
     .metric-delta { font-size: 0.8rem; color: #38bdf8; margin-top: 6px; }
-
     .result-fraud {
         background: linear-gradient(135deg, #1a0a0a, #2d0f0f); border: 1px solid #7f1d1d;
         border-left: 4px solid #ef4444; border-radius: 16px; padding: 28px 32px; text-align: center;
@@ -68,7 +58,6 @@ st.markdown("""
         border-left: 4px solid #22c55e; border-radius: 16px; padding: 28px 32px; text-align: center;
     }
     .result-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 700; margin: 0; }
-
     .section-header {
         font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; color: #e2e8f0;
         border-bottom: 1px solid #1e2d40; padding-bottom: 10px; margin-bottom: 20px;
@@ -97,19 +86,15 @@ st.markdown("""
         background-color: #0d1117; border-radius: 8px 8px 0 0; color: #64748b !important;
         border: 1px solid #1e2d40; border-bottom: none; font-size: 0.88rem;
     }
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #0d1f35, #111827) !important;
-        color: #38bdf8 !important;
-    }
+    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #0d1f35, #111827) !important; color: #38bdf8 !important; }
     hr { border-color: #1e2d40 !important; margin: 1.5rem 0; }
-    .stProgress > div > div > div {
-        background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 99px;
-    }
+    .stProgress > div > div > div { background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 99px; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ─── SESSION STATE ────────────────────────────────────────────────────────────
+# ─── SESSION STATE — SABSE PEHLE ─────────────────────────────────────────────
+# YE LINES SABI CHEEZ SE PEHLE HAIN — PAGE SWITCH PE KABHI RESET NAHI HONGI
 if 'prediction_done' not in st.session_state:
     st.session_state.prediction_done = False
 if 'prediction' not in st.session_state:
@@ -128,7 +113,7 @@ def load_and_train():
     try:
         df = pd.read_parquet('credit_card_frauds.parquet')
     except FileNotFoundError:
-        st.warning("credit_card_frauds.parquet not found. Using sample data.")
+        st.warning("credit_card_frauds.csv not found. Using sample data.")
         np.random.seed(42)
         n = 5000
         df = pd.DataFrame({
@@ -147,8 +132,8 @@ def load_and_train():
     df['trans_date_trans_time'] = pd.to_datetime(df['trans_date_trans_time'])
     df['dob'] = pd.to_datetime(df['dob'])
     df['hours'] = df['trans_date_trans_time'].dt.hour
-    df['day']   = df['trans_date_trans_time'].dt.dayofweek
-    df['age']   = (df['trans_date_trans_time'] - df['dob']).dt.days // 365
+    df['day'] = df['trans_date_trans_time'].dt.dayofweek
+    df['age'] = (df['trans_date_trans_time'] - df['dob']).dt.days // 365
 
     def haversine(lat1, lon1, lat2, lon2):
         R = 6371
@@ -201,9 +186,7 @@ with st.sidebar:
     st.markdown("""
     <div style="font-size:0.75rem;color:#334155;line-height:1.6;">
         <b style="color:#475569;">Model Info</b><br>
-        Algorithm: Random Forest<br>
-        Features: 7 inputs<br>
-        Training Data: 3.2k records
+        Algorithm: Random Forest<br>Features: 7 inputs<br>Training Data: 3.2k records
     </div>""", unsafe_allow_html=True)
 
 
@@ -278,6 +261,7 @@ if "Predictor" in page:
             prediction = pipe.predict(sample)[0]
             proba      = pipe.predict_proba(sample)[0]
 
+            # Sab kuch session_state mein save karo
             st.session_state.prediction_done = True
             st.session_state.prediction      = int(prediction)
             st.session_state.fraud_prob      = float(proba[1] * 100)
@@ -292,6 +276,7 @@ if "Predictor" in page:
                 "📅 Day":      day
             }
 
+        # Result — session_state se read hota hai, page switch ke baad bhi rahega
         if st.session_state.prediction_done:
             if st.session_state.prediction == 1:
                 st.markdown("""
@@ -364,7 +349,7 @@ elif "Analytics" in page:
                 textfont=dict(family='DM Sans', size=13, color='white')
             )])
             fig_pie.update_layout(
-                title=dict(text="Fraud Distribution", font=dict(color='#94a3b8',size=15)),
+                title=dict(text=" Fraud Distribution", font=dict(color='#94a3b8',size=15)),
                 paper_bgcolor='#0d1117', plot_bgcolor='#0d1117',
                 font=dict(color='#94a3b8'), legend=dict(font=dict(color='#94a3b8')),
                 margin=dict(t=50,b=10))
