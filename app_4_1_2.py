@@ -19,7 +19,7 @@ st.set_page_config(
     page_title="FraudShield AI",
     page_icon="🛡️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ─── CSS ─────────────────────────────────────────────────────────────────────
@@ -30,11 +30,27 @@ st.markdown("""
     .stApp { background: #080c14; font-family: 'DM Sans', sans-serif; color: #e2e8f0; }
     #MainMenu, footer, header { visibility: hidden; }
 
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1117 0%, #0a0f1a 100%);
-        border-right: 1px solid #1a2332;
+    /* Hide sidebar completely — we use top nav */
+    [data-testid="stSidebar"] { display: none !important; }
+    [data-testid="collapsedControl"] { display: none !important; }
+
+    /* ── TOP NAV BAR ── */
+    .topnav {
+        display: flex; align-items: center; justify-content: space-between;
+        background: linear-gradient(90deg, #0d1117 0%, #0a0f1a 100%);
+        border-bottom: 1px solid #1a2332;
+        padding: 14px 28px; margin-bottom: 28px;
+        border-radius: 0 0 16px 16px;
     }
-    [data-testid="stSidebar"] * { color: #94a3b8 !important; }
+    .topnav-brand {
+        font-family: 'Syne', sans-serif; font-size: 1.4rem;
+        font-weight: 800; color: #38bdf8;
+    }
+    .topnav-sub {
+        font-size: 0.7rem; color: #334155;
+        letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .nav-buttons { display: flex; gap: 10px; }
 
     .hero-title {
         font-family: 'Syne', sans-serif; font-size: 3.2rem; font-weight: 800;
@@ -82,13 +98,30 @@ st.markdown("""
         color: #e2e8f0 !important; border-radius: 10px !important;
     }
     .stButton > button {
+        background: linear-gradient(135deg, #0d1f35, #111827) !important;
+        color: #64748b !important; border: 1px solid #1e3a5f !important;
+        border-radius: 10px !important; padding: 8px 20px !important;
+        font-family: 'DM Sans', sans-serif !important; font-size: 0.9rem !important;
+        font-weight: 500 !important; cursor: pointer !important;
+        transition: all 0.2s !important;
+    }
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important;
+        color: white !important; border-color: #4f46e5 !important;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3) !important;
+    }
+    .nav-active > button {
+        background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important;
+        color: white !important; border-color: #4f46e5 !important;
+    }
+    .analyze-btn > button {
         background: linear-gradient(135deg, #1d4ed8, #4f46e5) !important;
         color: white !important; border: none !important; border-radius: 12px !important;
         padding: 14px 32px !important; font-family: 'Syne', sans-serif !important;
         font-size: 1rem !important; font-weight: 700 !important; width: 100% !important;
-        letter-spacing: 0.04em !important; cursor: pointer !important;
+        letter-spacing: 0.04em !important;
     }
-    .stButton > button:hover {
+    .analyze-btn > button:hover {
         background: linear-gradient(135deg, #2563eb, #6366f1) !important;
         box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35) !important;
     }
@@ -110,6 +143,8 @@ st.markdown("""
 
 
 # ─── SESSION STATE ────────────────────────────────────────────────────────────
+if 'page' not in st.session_state:
+    st.session_state.page = 'predictor'
 if 'prediction_done' not in st.session_state:
     st.session_state.prediction_done = False
 if 'prediction' not in st.session_state:
@@ -128,7 +163,6 @@ def load_and_train():
     try:
         df = pd.read_parquet('credit_card_frauds.parquet')
     except FileNotFoundError:
-        st.warning("credit_card_frauds.parquet not found. Using sample data.")
         np.random.seed(42)
         n = 5000
         df = pd.DataFrame({
@@ -185,32 +219,52 @@ with st.spinner("Loading AI Model..."):
     pipe, df, accuracy, X_test, y_test, y_pred = load_and_train()
 
 
-# ─── SIDEBAR ─────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown("""
-    <div style="padding:10px 0 24px 0; border-bottom:1px solid #1e2d40; margin-bottom:20px;">
-        <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#38bdf8;">🛡️ FraudShield</div>
-        <div style="font-size:0.72rem;color:#334155;letter-spacing:0.1em;text-transform:uppercase;">AI Detection System</div>
-    </div>""", unsafe_allow_html=True)
+# ─── TOP NAVIGATION BAR ──────────────────────────────────────────────────────
+st.markdown("""
+<div class="topnav">
+    <div>
+        <div class="topnav-brand">🛡️ FraudShield</div>
+        <div class="topnav-sub">AI Detection System</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("### Navigation")
-    page = st.radio("Go to",
-        ["🔍 Fraud Predictor", "📊 Analytics Dashboard", "ℹ️ About"],
-        label_visibility="collapsed")
-    st.markdown("---")
-    st.markdown("""
-    <div style="font-size:0.75rem;color:#334155;line-height:1.6;">
-        <b style="color:#475569;">Model Info</b><br>
-        Algorithm: Random Forest<br>
-        Features: 7 inputs<br>
-        Training Data: 3.2k records
-    </div>""", unsafe_allow_html=True)
+# Navigation buttons
+col_n1, col_n2, col_n3, col_spacer = st.columns([1, 1, 1, 5])
+
+with col_n1:
+    active1 = "nav-active" if st.session_state.page == 'predictor' else ""
+    st.markdown(f'<div class="{active1}">', unsafe_allow_html=True)
+    if st.button("🔍 Fraud Predictor", key="nav_pred"):
+        st.session_state.page = 'predictor'
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_n2:
+    active2 = "nav-active" if st.session_state.page == 'analytics' else ""
+    st.markdown(f'<div class="{active2}">', unsafe_allow_html=True)
+    if st.button("📊 Analytics", key="nav_analytics"):
+        st.session_state.page = 'analytics'
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_n3:
+    active3 = "nav-active" if st.session_state.page == 'about' else ""
+    st.markdown(f'<div class="{active3}">', unsafe_allow_html=True)
+    if st.button("ℹ️ About", key="nav_about"):
+        st.session_state.page = 'about'
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown("<hr>", unsafe_allow_html=True)
+
+page = st.session_state.page
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 1 — FRAUD PREDICTOR
 # ═══════════════════════════════════════════════════════════════════════════════
-if "Predictor" in page:
+if page == 'predictor':
 
     st.markdown('<div class="hero-title">FraudShield AI</div>', unsafe_allow_html=True)
     st.markdown('<div class="hero-sub">Real-time credit card fraud detection powered by Random Forest ML</div>', unsafe_allow_html=True)
@@ -262,7 +316,9 @@ if "Predictor" in page:
         day_num = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].index(day)
 
         st.markdown("<br>", unsafe_allow_html=True)
-        predict_clicked = st.button("⚡ ANALYZE TRANSACTION", use_container_width=True)
+        st.markdown('<div class="analyze-btn">', unsafe_allow_html=True)
+        predict_clicked = st.button("⚡ ANALYZE TRANSACTION", use_container_width=True, key="analyze")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with right_col:
         st.markdown('<div class="section-header">🎯 Prediction Result</div>', unsafe_allow_html=True)
@@ -341,7 +397,7 @@ if "Predictor" in page:
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 2 — ANALYTICS DASHBOARD
 # ═══════════════════════════════════════════════════════════════════════════════
-elif "Analytics" in page:
+elif page == 'analytics':
 
     st.markdown('<div class="hero-title">Analytics Dashboard</div>', unsafe_allow_html=True)
     st.markdown('<div class="hero-sub">Deep insights into fraud patterns from the dataset</div>', unsafe_allow_html=True)
@@ -435,7 +491,7 @@ elif "Analytics" in page:
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — ABOUT
 # ═══════════════════════════════════════════════════════════════════════════════
-elif "About" in page:
+elif page == 'about':
 
     st.markdown('<div class="hero-title">About This Project</div>', unsafe_allow_html=True)
     st.markdown('<div class="hero-sub">Credit Card Fraud Detection using Machine Learning</div>', unsafe_allow_html=True)
