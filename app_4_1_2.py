@@ -477,3 +477,4 @@ elif "About" in page:
                 <b style="color:#94a3b8;">Plotly</b> — Interactive charts
             </div>
         </div>""", unsafe_allow_html=True)#end 
+        
